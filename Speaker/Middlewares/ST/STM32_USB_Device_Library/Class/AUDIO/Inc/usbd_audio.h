@@ -42,7 +42,7 @@ extern "C" {
   */
 #ifndef USBD_AUDIO_FREQ
 /* AUDIO Class Config */
-#define USBD_AUDIO_FREQ                               48000U
+#define USBD_AUDIO_FREQ                               16000U
 #endif /* USBD_AUDIO_FREQ */
 
 #ifndef USBD_MAX_NUM_INTERFACES

@@ -329,6 +329,7 @@ typedef enum
   CLASS_TYPE_VIDEO   = 10,
   CLASS_TYPE_PRINTER = 11,
   CLASS_TYPE_CCID    = 12,
+  CLASS_TYPE_MICROPHONE = 13,
 } USBD_CompositeClassTypeDef;
 
 
@@ -511,4 +512,3 @@ __STATIC_INLINE uint16_t SWAPBYTE(uint8_t *addr)
 /**
   * @}
   */
-

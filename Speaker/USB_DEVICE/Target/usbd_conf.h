@@ -35,10 +35,11 @@
 #include "stm32h7xx_hal.h"
 
 /* USER CODE BEGIN INCLUDE */
-// #define USE_USBD_COMPOSITE          0
-// #define USBD_COMPOSITE_USE_IAD      0
-// #define USBD_CMPSIT_ACTIVATE_AUDIO  0
-// #define USBD_CMPSIT_ACTIVATE_CDC    0
+#define USE_USBD_COMPOSITE          1
+#define USBD_COMPOSITE_USE_IAD      1
+#define USBD_CMPSIT_ACTIVATE_AUDIO  0
+#define USBD_CMPSIT_ACTIVATE_CDC    1
+#define USBD_CMPSIT_ACTIVATE_MICROPHONE 1
 /* USER CODE END INCLUDE */
 
 /** @addtogroup USBD_OTG_DRIVER
@@ -78,7 +79,7 @@
 /*---------- -----------*/
 #define USBD_SELF_POWERED     1U
 /*---------- -----------*/
-//#define USBD_AUDIO_FREQ     16000U
+#define USBD_AUDIO_FREQ     16000U
 
 /****************************************/
 /* #define for FS and HS identification */

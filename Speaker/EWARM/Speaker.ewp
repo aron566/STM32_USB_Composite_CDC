@@ -361,6 +361,7 @@
                     <state>$PROJ_DIR$/../Drivers/CMSIS/Include</state>
                     <state>$PROJ_DIR$\..\Middlewares\CompositeBuilder\Inc</state>
                     <state>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\CDC\Inc</state>
+                    <state>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\MICROPHONE\Inc</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1110,9 +1111,6 @@
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\USB_DEVICE\App\usbd_audio_if.c</name>
-                        <excluded>
-                            <configuration>Speaker</configuration>
-                        </excluded>
                     </file>
                     <file>
                         <name>$PROJ_DIR$\..\USB_DEVICE\App\usbd_cdc_if.c</name>
@@ -1235,18 +1233,12 @@
             <name>Composite_Builder</name>
             <file>
                 <name>$PROJ_DIR$\..\Middlewares\CompositeBuilder\Src\usbd_composite_builder.c</name>
-                <excluded>
-                    <configuration>Speaker</configuration>
-                </excluded>
             </file>
         </group>
         <group>
             <name>USB_Device_Library</name>
             <file>
                 <name>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\AUDIO\Src\usbd_audio.c</name>
-                <excluded>
-                    <configuration>Speaker</configuration>
-                </excluded>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\CDC\Src\usbd_cdc.c</name>
@@ -1259,6 +1251,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Core\Src\usbd_ioreq.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\MICROPHONE\Src\usbd_microphone.c</name>
             </file>
         </group>
     </group>

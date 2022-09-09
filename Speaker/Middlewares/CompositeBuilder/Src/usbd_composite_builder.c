@@ -149,6 +149,10 @@ static void  USBD_CMPSIT_CCIDDesc(USBD_HandleTypeDef *pdev, uint32_t pConf, __IO
 static void  USBD_CMPSIT_MTPDesc(USBD_HandleTypeDef *pdev, uint32_t pConf, __IO uint32_t *Sze, uint8_t speed);
 #endif /* USBD_CMPSIT_ACTIVATE_MTP == 1U */
 
+#if USBD_CMPSIT_ACTIVATE_MICROPHONE == 1U
+static void  USBD_CMPSIT_MICROPHONEDesc(USBD_HandleTypeDef *pdev, uint32_t pConf, __IO uint32_t *Sze, uint8_t speed);
+#endif /* USBD_CMPSIT_ACTIVATE_MICROPHONE == 1U */
+
 /**
   * @}
   */
@@ -495,6 +499,32 @@ uint8_t  USBD_CMPSIT_AddToConfDesc(USBD_HandleTypeDef *pdev)
 
       break;
 #endif /* USBD_CMPSIT_ACTIVATE_AUDIO */
+
+#if USBD_CMPSIT_ACTIVATE_MICROPHONE == 1
+    case CLASS_TYPE_MICROPHONE:
+      /* Setup Max packet sizes*/
+      pdev->tclasslist[pdev->classId].CurrPcktSze = USBD_AUDIO_GetEpPcktSze(pdev, 0U, 0U);
+
+      /* Find the first available interface slot and Assign number of interfaces */
+      idxIf = USBD_CMPSIT_FindFreeIFNbr(pdev);
+      pdev->tclasslist[pdev->classId].NumIf = 2U;
+      pdev->tclasslist[pdev->classId].Ifs[0] = idxIf;
+      pdev->tclasslist[pdev->classId].Ifs[1] = (uint8_t)(idxIf + 1U);
+
+      /* Assign endpoint numbers */
+      pdev->tclasslist[pdev->classId].NumEps = 1U; /* EP1_IN*/
+
+      /* Set IN endpoint slot */
+      iEp = pdev->tclasslist[pdev->classId].EpAdd[0];
+
+      /* Assign IN Endpoint */
+      USBD_CMPSIT_AssignEp(pdev, iEp, USBD_EP_TYPE_ISOC, pdev->tclasslist[pdev->classId].CurrPcktSze);
+
+      /* Configure and Append the Descriptor (only FS mode supported) */
+      USBD_CMPSIT_MICROPHONEDesc(pdev, (uint32_t)pCmpstFSConfDesc, &CurrFSConfDescSz, (uint8_t)USBD_SPEED_FULL);
+
+      break;
+#endif /* USBD_CMPSIT_ACTIVATE_MICROPHONE */
 
 #if USBD_CMPSIT_ACTIVATE_CUSTOMHID == 1
     case CLASS_TYPE_CHID:
@@ -1178,8 +1208,8 @@ static void  USBD_CMPSIT_AUDIODesc(USBD_HandleTypeDef *pdev, uint32_t pConf, __I
   pSpInDesc->bTerminalID = 0x01U;
   pSpInDesc->wTerminalType = 0x0101U;
   pSpInDesc->bAssocTerminal = 0x00U;
-  pSpInDesc->bNrChannels = 0x01U;
-  pSpInDesc->wChannelConfig = 0x0000U;
+  pSpInDesc->bNrChannels = 0x02U;
+  pSpInDesc->wChannelConfig = 0x0003U;
   pSpInDesc->iChannelNames = 0x00U;
   pSpInDesc->iTerminal = 0x00U;
   *Sze += (uint32_t)sizeof(USBD_SpeakerInDescTypeDef);
@@ -1238,9 +1268,9 @@ static void  USBD_CMPSIT_AUDIODesc(USBD_HandleTypeDef *pdev, uint32_t pConf, __I
   pSpIIIDesc->bSubFrameSize = 0x02U;
   pSpIIIDesc->bBitResolution = 16U;
   pSpIIIDesc->bSamFreqType = 1U;
-  pSpIIIDesc->tSamFreq2 = 0x80U;
-  pSpIIIDesc->tSamFreq1 = 0xBBU;
-  pSpIIIDesc->tSamFreq0 = 0x00U;
+  pSpIIIDesc->tSamFreq2 = (uint8_t)(AUDIO_SMAPLE_RATE_HZ);
+  pSpIIIDesc->tSamFreq1 = (uint8_t)((AUDIO_SMAPLE_RATE_HZ >> 8));
+  pSpIIIDesc->tSamFreq0 = (uint8_t)((AUDIO_SMAPLE_RATE_HZ >> 16));
   *Sze += (uint32_t)sizeof(USBD_SpeakerIIIFormatIfDescTypeDef);
 
   /* Endpoint 1 - Standard Descriptor */
@@ -1270,6 +1300,160 @@ static void  USBD_CMPSIT_AUDIODesc(USBD_HandleTypeDef *pdev, uint32_t pConf, __I
   ((USBD_ConfigDescTypeDef *)pConf)->wTotalLength = *Sze;
 }
 #endif /* USBD_CMPSIT_ACTIVATE_AUDIO */
+
+#if USBD_CMPSIT_ACTIVATE_MICROPHONE == 1
+/**
+  * @brief  USBD_CMPSIT_MICROPHONEDesc
+  *         Configure and Append the MICROPHONE Descriptor
+  * @param  pdev: device instance
+  * @param  pConf: Configuration descriptor pointer
+  * @param  Sze: pointer to the current configuration descriptor size
+  * @retval None
+  */
+static void  USBD_CMPSIT_MICROPHONEDesc(USBD_HandleTypeDef *pdev, uint32_t pConf, __IO uint32_t *Sze, uint8_t speed)
+{
+  static USBD_IfDescTypeDef *pIfDesc;
+  static USBD_IadDescTypeDef *pIadDesc;
+  UNUSED(speed);
+
+  /* Append AUDIO Interface descriptor to Configuration descriptor */
+  USBD_SpeakerIfDescTypeDef            *pSpIfDesc;
+  USBD_SpeakerInDescTypeDef            *pSpInDesc;
+  USBD_SpeakerFeatureDescTypeDef       *pSpFDesc;
+  USBD_SpeakerOutDescTypeDef           *pSpOutDesc;
+  USBD_SpeakerStreamIfDescTypeDef      *pSpStrDesc;
+  USBD_SpeakerIIIFormatIfDescTypeDef   *pSpIIIDesc;
+  USBD_SpeakerEndDescTypeDef           *pSpEpDesc;
+  USBD_SpeakerEndStDescTypeDef         *pSpEpStDesc;
+
+#if USBD_COMPOSITE_USE_IAD == 1
+  pIadDesc                          = ((USBD_IadDescTypeDef *)(pConf + *Sze));
+  pIadDesc->bLength                 = (uint8_t)sizeof(USBD_IadDescTypeDef);
+  pIadDesc->bDescriptorType         = USB_DESC_TYPE_IAD; /* IAD descriptor */
+  pIadDesc->bFirstInterface         = pdev->tclasslist[pdev->classId].Ifs[0];
+  pIadDesc->bInterfaceCount         = 2U;    /* 2 interfaces */
+  pIadDesc->bFunctionClass          = USB_DEVICE_CLASS_AUDIO;
+  pIadDesc->bFunctionSubClass       = AUDIO_SUBCLASS_AUDIOCONTROL;
+  pIadDesc->bFunctionProtocol       = AUDIO_PROTOCOL_UNDEFINED;
+  pIadDesc->iFunction               = 0U; /* String Index */
+  *Sze                             += (uint32_t)sizeof(USBD_IadDescTypeDef);
+#endif /* USBD_COMPOSITE_USE_IAD == 1 */
+
+  /* Append AUDIO Interface descriptor to Configuration descriptor */
+  __USBD_CMPSIT_SET_IF(pdev->tclasslist[pdev->classId].Ifs[0], 0U, 0U, USB_DEVICE_CLASS_AUDIO, \
+                       AUDIO_SUBCLASS_AUDIOCONTROL, AUDIO_PROTOCOL_UNDEFINED, 0U);
+
+  /* Append AUDIO USB Microphone Class-specific AC Interface descriptor to Configuration descriptor */
+  pSpIfDesc = ((USBD_SpeakerIfDescTypeDef *)(pConf + *Sze));
+  pSpIfDesc->bLength = (uint8_t)sizeof(USBD_IfDescTypeDef);
+  pSpIfDesc->bDescriptorType = AUDIO_INTERFACE_DESCRIPTOR_TYPE;
+  pSpIfDesc->bDescriptorSubtype = AUDIO_CONTROL_HEADER;
+  pSpIfDesc->bcdADC = 0x0100U;
+  pSpIfDesc->wTotalLength = 0x0027U;
+  pSpIfDesc->bInCollection = 0x01U;
+  pSpIfDesc->baInterfaceNr = 0x01U;
+  *Sze += (uint32_t)sizeof(USBD_IfDescTypeDef);
+
+  /* Append USB Microphone Input Terminal Descriptor to Configuration descriptor*/
+  pSpInDesc = ((USBD_SpeakerInDescTypeDef *)(pConf + *Sze));
+  pSpInDesc->bLength = (uint8_t)sizeof(USBD_SpeakerInDescTypeDef);
+  pSpInDesc->bDescriptorType = AUDIO_INTERFACE_DESCRIPTOR_TYPE;
+  pSpInDesc->bDescriptorSubtype = AUDIO_CONTROL_INPUT_TERMINAL;
+  pSpInDesc->bTerminalID = 0x01U;
+  pSpInDesc->wTerminalType = 0x0201U;
+  pSpInDesc->bAssocTerminal = 0x00U;
+  pSpInDesc->bNrChannels = 0x02U;
+  pSpInDesc->wChannelConfig = 0x0003U;
+  pSpInDesc->iChannelNames = 0x00U;
+  pSpInDesc->iTerminal = 0x00U;
+  *Sze += (uint32_t)sizeof(USBD_SpeakerInDescTypeDef);
+
+  /*Append USB Microphone Audio Feature Unit Descriptor to Configuration descriptor */
+  pSpFDesc = ((USBD_SpeakerFeatureDescTypeDef *)(pConf + *Sze));
+  pSpFDesc->bLength = (uint8_t)sizeof(USBD_SpeakerFeatureDescTypeDef);
+  pSpFDesc->bDescriptorType = AUDIO_INTERFACE_DESCRIPTOR_TYPE;
+  pSpFDesc->bDescriptorSubtype = AUDIO_CONTROL_FEATURE_UNIT;
+  pSpFDesc->bUnitID = AUDIO_OUT_STREAMING_CTRL;
+  pSpFDesc->bSourceID = 0x01U;
+  pSpFDesc->bControlSize = 0x01U;
+  pSpFDesc->bmaControls = AUDIO_CONTROL_MUTE;
+  pSpFDesc->iTerminal = 0x00U;
+  *Sze += (uint32_t)sizeof(USBD_SpeakerFeatureDescTypeDef);
+
+  /*Append USB Microphone Output Terminal Descriptor to Configuration descriptor*/
+  pSpOutDesc = ((USBD_SpeakerOutDescTypeDef *)(pConf + *Sze));
+  pSpOutDesc->bLength = (uint8_t)sizeof(USBD_SpeakerOutDescTypeDef);
+  pSpOutDesc->bDescriptorType = AUDIO_INTERFACE_DESCRIPTOR_TYPE;
+  pSpOutDesc->bDescriptorSubtype = AUDIO_CONTROL_OUTPUT_TERMINAL;
+  pSpOutDesc->bTerminalID = 0x03U;
+  pSpOutDesc->wTerminalType = 0x0101U;
+  pSpOutDesc->bAssocTerminal = 0x00U;
+  pSpOutDesc->bSourceID = 0x02U;
+  pSpOutDesc->iTerminal = 0x00U;
+  *Sze += (uint32_t)sizeof(USBD_SpeakerOutDescTypeDef);
+
+  /* USB Microphone Standard AS Interface Descriptor - Audio Streaming Zero Bandwidth */
+  /* Interface 1, Alternate Setting 0*/
+  __USBD_CMPSIT_SET_IF(pdev->tclasslist[pdev->classId].Ifs[1], 0U, 0U, USB_DEVICE_CLASS_AUDIO, \
+                       AUDIO_SUBCLASS_AUDIOSTREAMING, AUDIO_PROTOCOL_UNDEFINED, 0U);
+
+  /* USB Microphone Standard AS Interface Descriptor -Audio Streaming Operational */
+  /* Interface 1, Alternate Setting 1*/
+  __USBD_CMPSIT_SET_IF(pdev->tclasslist[pdev->classId].Ifs[1], 0x01U, 0x01U, USB_DEVICE_CLASS_AUDIO, \
+                       AUDIO_SUBCLASS_AUDIOSTREAMING, AUDIO_PROTOCOL_UNDEFINED, 0U);
+
+  /* USB Microphone Audio Streaming Interface Descriptor */
+  pSpStrDesc = ((USBD_SpeakerStreamIfDescTypeDef *)(pConf + *Sze));
+  pSpStrDesc->bLength = (uint8_t)sizeof(USBD_SpeakerStreamIfDescTypeDef);
+  pSpStrDesc->bDescriptorType = AUDIO_INTERFACE_DESCRIPTOR_TYPE;
+  pSpStrDesc->bDescriptorSubtype = AUDIO_STREAMING_GENERAL;
+  pSpStrDesc->bTerminalLink = 0x03U;
+  pSpStrDesc->bDelay = 0x01U;
+  pSpStrDesc->wFormatTag = 0x0001U;
+  *Sze += (uint32_t)sizeof(USBD_SpeakerStreamIfDescTypeDef);
+
+  /* USB Microphone Audio Type III Format Interface Descriptor */
+  pSpIIIDesc = ((USBD_SpeakerIIIFormatIfDescTypeDef *)(pConf + *Sze));
+  pSpIIIDesc->bLength = (uint8_t)sizeof(USBD_SpeakerIIIFormatIfDescTypeDef);
+  pSpIIIDesc->bDescriptorType = AUDIO_INTERFACE_DESCRIPTOR_TYPE;
+  pSpIIIDesc->bDescriptorSubtype = AUDIO_STREAMING_FORMAT_TYPE;
+  pSpIIIDesc->bFormatType = AUDIO_FORMAT_TYPE_I;
+  pSpIIIDesc->bNrChannels = 0x02U;
+  pSpIIIDesc->bSubFrameSize = 0x02U;
+  pSpIIIDesc->bBitResolution = 16U;
+  pSpIIIDesc->bSamFreqType = 1U;
+  pSpIIIDesc->tSamFreq2 = (uint8_t)(AUDIO_SMAPLE_RATE_HZ);
+  pSpIIIDesc->tSamFreq1 = (uint8_t)((AUDIO_SMAPLE_RATE_HZ >> 8));
+  pSpIIIDesc->tSamFreq0 = (uint8_t)((AUDIO_SMAPLE_RATE_HZ >> 16));
+  *Sze += (uint32_t)sizeof(USBD_SpeakerIIIFormatIfDescTypeDef);
+
+  /* Endpoint 1 - Standard Descriptor */
+  pSpEpDesc = ((USBD_SpeakerEndDescTypeDef *)(pConf + *Sze));
+  pSpEpDesc->bLength = 0x09U;
+  pSpEpDesc->bDescriptorType = USB_DESC_TYPE_ENDPOINT;
+  pSpEpDesc->bEndpointAddress = pdev->tclasslist[pdev->classId].Eps[0].add;
+  pSpEpDesc->bmAttributes = USBD_EP_TYPE_ISOC;
+  pSpEpDesc->wMaxPacketSize = USBD_AUDIO_GetEpPcktSze(pdev, 0U, 0U);
+  pSpEpDesc->bInterval = 0x01U;
+  pSpEpDesc->bRefresh = 0x00U;
+  pSpEpDesc->bSynchAddress = 0x00U;
+  *Sze += 0x09U;
+
+  /* Endpoint - Audio Streaming Descriptor*/
+  pSpEpStDesc = ((USBD_SpeakerEndStDescTypeDef *)(pConf + *Sze));
+  pSpEpStDesc->bLength = (uint8_t)sizeof(USBD_SpeakerEndStDescTypeDef);
+  pSpEpStDesc->bDescriptorType = AUDIO_ENDPOINT_DESCRIPTOR_TYPE;
+  pSpEpStDesc->bDescriptor = AUDIO_ENDPOINT_GENERAL;
+  pSpEpStDesc->bmAttributes = 0x00U;
+  pSpEpStDesc->bLockDelayUnits = 0x00U;
+  pSpEpStDesc->wLockDelay = 0x0000U;
+  *Sze += (uint32_t)sizeof(USBD_SpeakerEndStDescTypeDef);
+
+  /* Update Config Descriptor and IAD descriptor */
+  ((USBD_ConfigDescTypeDef *)pConf)->bNumInterfaces += 2U;
+  ((USBD_ConfigDescTypeDef *)pConf)->wTotalLength = *Sze;
+}
+#endif /* USBD_CMPSIT_ACTIVATE_MICROPHONE */
 
 #if USBD_CMPSIT_ACTIVATE_RNDIS == 1
 /**

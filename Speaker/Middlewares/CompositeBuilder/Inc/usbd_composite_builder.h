@@ -79,6 +79,10 @@ extern "C" {
 #include "usbd_mtp.h"
 #endif /* USBD_CMPSIT_ACTIVATE_MTP */
 
+#if USBD_CMPSIT_ACTIVATE_MICROPHONE == 1U
+#include "usbd_microphone.h"
+#endif /* USBD_CMPSIT_ACTIVATE_MICROPHONE */
+
 /* Private defines -----------------------------------------------------------*/
 /* By default all classes are deactivated, in order to activate a class
    define its value to zero  */
@@ -130,6 +134,9 @@ extern "C" {
 #define USBD_CMPSIT_ACTIVATE_MTP                           0U
 #endif /* USBD_CMPSIT_ACTIVATE_MTP */
 
+#ifndef USBD_CMPSIT_ACTIVATE_MICROPHONE
+#define USBD_CMPSIT_ACTIVATE_MICROPHONE                    0U
+#endif /* USBD_CMPSIT_ACTIVATE_MICROPHONE */
 
 /* This is the maximum supported configuration descriptor size
    User may define this value in usbd_conf.h in order to optimize footprint */
@@ -140,6 +147,8 @@ extern "C" {
 #ifndef USBD_CONFIG_STR_DESC_IDX
 #define USBD_CONFIG_STR_DESC_IDX                           4U
 #endif /* USBD_CONFIG_STR_DESC_IDX */
+
+#define AUDIO_SMAPLE_RATE_HZ                              16000U
 
 /* Exported types ------------------------------------------------------------*/
 /* USB Iad descriptors structure */

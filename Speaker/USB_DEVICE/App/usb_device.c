@@ -23,12 +23,13 @@
 #include "usb_device.h"
 #include "usbd_core.h"
 #include "usbd_desc.h"
-// #include "usbd_audio.h"
-// #include "usbd_audio_if.h"
+#include "usbd_audio.h"
+#include "usbd_audio_if.h"
 
 /* USER CODE BEGIN Includes */
 #include "usbd_cdc.h"
 #include "usbd_cdc_if.h"
+#include "usbd_microphone.h"
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN PV */
@@ -81,6 +82,19 @@ void MX_USB_DEVICE_Init(void)
   static uint8_t Audio_EP_Addr[] = {AUDIO_OUT_EP};
   if(USBD_RegisterClassComposite(&hUsbDeviceFS, &USBD_AUDIO,
                                                 CLASS_TYPE_AUDIO, Audio_EP_Addr) != USBD_OK)
+  {
+    Error_Handler();
+  }
+
+  /* 注册Microphone接口 */
+  if(USBD_MICROPHONE_RegisterInterface(&hUsbDeviceFS, &USBD_AUDIO_fops_FS) != USBD_OK)
+  {
+    Error_Handler();
+  }
+  /* 注册组合设备Microphone类 */
+  static uint8_t Microphone_EP_Addr[] = {MICROPHONE_IN_EP};
+  if(USBD_RegisterClassComposite(&hUsbDeviceFS, &USBD_MICROPHONE,
+                                                CLASS_TYPE_MICROPHONE, Microphone_EP_Addr) != USBD_OK)
   {
     Error_Handler();
   }

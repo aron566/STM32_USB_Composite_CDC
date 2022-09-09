@@ -150,9 +150,15 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   USB_DESC_TYPE_DEVICE,       /*bDescriptorType*/
   0x00,                       /*bcdUSB */
   0x02,
+#if USE_USBD_COMPOSITE        /* Audio Class */
+  0x00,                       /*bDeviceClass*/
+  0x00,                       /*bDeviceSubClass*/
+  0x00,                       /*bDeviceProtocol*/
+#else                         /* IAD */
   0xEF,                       /*bDeviceClass*/
   0x02,                       /*bDeviceSubClass*/
   0x01,                       /*bDeviceProtocol*/
+#endif                           /* CDC */
   // 0x02,                       /*bDeviceClass*/
   // 0x02,                       /*bDeviceSubClass*/
   // 0x00,                       /*bDeviceProtocol*/
