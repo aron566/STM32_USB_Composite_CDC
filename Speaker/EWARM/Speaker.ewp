@@ -362,6 +362,8 @@
                     <state>$PROJ_DIR$\..\Middlewares\CompositeBuilder\Inc</state>
                     <state>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\CDC\Inc</state>
                     <state>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\MICROPHONE\Inc</state>
+                    <state>$PROJ_DIR$\..\APP</state>
+                    <state>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\HEADPHONE\Inc</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -1054,6 +1056,15 @@
         </settings>
     </configuration>
     <group>
+        <name>APP</name>
+        <file>
+            <name>$PROJ_DIR$\..\APP\CircularQueue.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\APP\USB_Audio_Port.c</name>
+        </file>
+    </group>
+    <group>
         <name>Application</name>
         <group>
             <name>EWARM</name>
@@ -1248,6 +1259,9 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Core\Src\usbd_ctlreq.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Class\HEADPHONE\Src\usbd_headphone.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Middlewares\ST\STM32_USB_Device_Library\Core\Src\usbd_ioreq.c</name>

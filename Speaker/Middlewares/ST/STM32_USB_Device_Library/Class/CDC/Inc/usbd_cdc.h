@@ -47,30 +47,29 @@ extern "C" {
 #define CDC_OUT_EP                                  0x01U  /* EP1 for data OUT */
 #endif /* CDC_OUT_EP */
 #ifndef CDC_CMD_EP
-#define CDC_CMD_EP                                  0x84U  /* EP4 for CDC commands */
+#define CDC_CMD_EP                                  0x85U  /* EP5 for CDC commands */
 #endif /* CDC_CMD_EP  */
 
 /* 2 路 USB CDC */
-#define USE_CDC_IAD                                 1       /**< 使用多路CDC使能 */
 #define USE_CDC_NUM                                 3       /**< 使用2路 or 3路 */
-#ifndef CDC_IN_EP2
-#define CDC_IN_EP2                                   0x82U  /* EP2 for data IN */
+#ifndef CDC2_IN_EP
+#define CDC2_IN_EP                                   0x83U  /* EP3 for data IN */
 #endif /* CDC_IN_EP */
-#ifndef CDC_OUT_EP2
-#define CDC_OUT_EP2                                  0x02U  /* EP2 for data OUT */
+#ifndef CDC2_OUT_EP
+#define CDC2_OUT_EP                                  0x03U  /* EP3 for data OUT */
 #endif /* CDC_OUT_EP */
-#ifndef CDC_CMD_EP5
-#define CDC_CMD_EP5                                  0x85U  /* EP5 for CDC commands */
+#ifndef CDC2_CMD_EP
+#define CDC2_CMD_EP                                  0x86U  /* EP6 for CDC commands */
 #endif /* CDC_CMD_EP  */
 
-#ifndef CDC_IN_EP3
-#define CDC_IN_EP3                                   0x83U  /* EP3 for data IN */
+#ifndef CDC3_IN_EP
+#define CDC3_IN_EP                                   0x84U  /* EP4 for data IN */
 #endif /* CDC_IN_EP */
-#ifndef CDC_OUT_EP3
-#define CDC_OUT_EP3                                  0x03U  /* EP3 for data OUT */
+#ifndef CDC3_OUT_EP
+#define CDC3_OUT_EP                                  0x04U  /* EP4 for data OUT */
 #endif /* CDC_OUT_EP */
-#ifndef CDC_CMD_EP6
-#define CDC_CMD_EP6                                  0x86U  /* EP6 for CDC commands */
+#ifndef CDC3_CMD_EP
+#define CDC3_CMD_EP                                  0x87U  /* EP7 for CDC commands */
 #endif /* CDC_CMD_EP  */
 
 #ifndef CDC_HS_BINTERVAL
@@ -86,9 +85,9 @@ extern "C" {
 #define CDC_DATA_FS_MAX_PACKET_SIZE                 64U  /* Endpoint IN & OUT Packet size */
 #define CDC_CMD_PACKET_SIZE                         8U  /* Control Endpoint Packet size */
 
-#if USE_CDC_IAD && USE_CDC_NUM == 2
+#if USE_CDC_NUM == 2
   #define USB_CDC_CONFIG_DESC_SIZ                     ((67U - 9U + 8U) * 2U + 9U)
-#elif USE_CDC_IAD && USE_CDC_NUM == 3
+#elif USE_CDC_NUM == 3
   #define USB_CDC_CONFIG_DESC_SIZ                     ((67U - 9U + 8U) * 3U + 9U)
 #else
   #define USB_CDC_CONFIG_DESC_SIZ                     67U

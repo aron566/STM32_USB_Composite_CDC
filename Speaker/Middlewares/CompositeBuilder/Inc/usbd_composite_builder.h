@@ -35,7 +35,7 @@ extern "C" {
 #include "usbd_msc.h"
 #endif /* USBD_CMPSIT_ACTIVATE_MSC */
 
-#if USBD_CMPSIT_ACTIVATE_CDC == 1U
+#if USBD_CMPSIT_ACTIVATE_CDC == 1U || USBD_CMPSIT_ACTIVATE_MULTI_CDC
 #include "usbd_cdc.h"
 #endif /* USBD_CMPSIT_ACTIVATE_CDC */
 
@@ -82,6 +82,10 @@ extern "C" {
 #if USBD_CMPSIT_ACTIVATE_MICROPHONE == 1U
 #include "usbd_microphone.h"
 #endif /* USBD_CMPSIT_ACTIVATE_MICROPHONE */
+
+#if USBD_CMPSIT_ACTIVATE_HEADPHONE == 1U
+#include "usbd_headphone.h"
+#endif /* USBD_CMPSIT_ACTIVATE_HEADPHONE */
 
 /* Private defines -----------------------------------------------------------*/
 /* By default all classes are deactivated, in order to activate a class
@@ -138,10 +142,18 @@ extern "C" {
 #define USBD_CMPSIT_ACTIVATE_MICROPHONE                    0U
 #endif /* USBD_CMPSIT_ACTIVATE_MICROPHONE */
 
+#ifndef USBD_CMPSIT_ACTIVATE_HEADPHONE
+#define USBD_CMPSIT_ACTIVATE_HEADPHONE                     0U
+#endif /* USBD_CMPSIT_ACTIVATE_HEADPHONE */
+
+#ifndef USBD_CMPSIT_ACTIVATE_MULTI_CDC
+#define USBD_CMPSIT_ACTIVATE_MULTI_CDC                     0U
+#endif /* USBD_CMPSIT_ACTIVATE_MULTI_CDC */
+
 /* This is the maximum supported configuration descriptor size
    User may define this value in usbd_conf.h in order to optimize footprint */
 #ifndef USBD_CMPST_MAX_CONFDESC_SZ
-#define USBD_CMPST_MAX_CONFDESC_SZ                         300U
+#define USBD_CMPST_MAX_CONFDESC_SZ                         512U
 #endif /* USBD_CMPST_MAX_CONFDESC_SZ */
 
 #ifndef USBD_CONFIG_STR_DESC_IDX
@@ -178,7 +190,7 @@ typedef struct
   uint8_t           iInterface;
 } USBD_IfDescTypeDef;
 
-#if (USBD_CMPSIT_ACTIVATE_CDC == 1) || (USBD_CMPSIT_ACTIVATE_RNDIS == 1) || (USBD_CMPSIT_ACTIVATE_CDC_ECM == 1)
+#if (USBD_CMPSIT_ACTIVATE_CDC == 1) || (USBD_CMPSIT_ACTIVATE_RNDIS == 1) || (USBD_CMPSIT_ACTIVATE_CDC_ECM == 1) || (USBD_CMPSIT_ACTIVATE_MULTI_CDC == 1)
 typedef struct
 {
 /*

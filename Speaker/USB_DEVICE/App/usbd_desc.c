@@ -151,17 +151,28 @@ __ALIGN_BEGIN uint8_t USBD_FS_DeviceDesc[USB_LEN_DEV_DESC] __ALIGN_END =
   0x00,                       /*bcdUSB */
   0x02,
 #if USE_USBD_COMPOSITE        /* Audio Class */
-  0x00,                       /*bDeviceClass*/
-  0x00,                       /*bDeviceSubClass*/
-  0x00,                       /*bDeviceProtocol*/
-#else                         /* IAD */
+#if USBD_COMPOSITE_USE_IAD
   0xEF,                       /*bDeviceClass*/
   0x02,                       /*bDeviceSubClass*/
   0x01,                       /*bDeviceProtocol*/
-#endif                           /* CDC */
-  // 0x02,                       /*bDeviceClass*/
-  // 0x02,                       /*bDeviceSubClass*/
-  // 0x00,                       /*bDeviceProtocol*/
+#else
+  #if USBD_CMPSIT_ACTIVATE_CDC || USBD_CMPSIT_ACTIVATE_MULTI_CDC
+                              /* CDC 02 02 00 */
+  0x02,
+  0x02,
+  0x00,
+  #else
+                              /* normal */
+  0x00,                       /*bDeviceClass*/
+  0x00,                       /*bDeviceSubClass*/
+  0x00,                       /*bDeviceProtocol*/
+  #endif
+#endif
+#else                         /* CDC 02 02 00 */
+  0x00,                       /*bDeviceClass*/
+  0x00,                       /*bDeviceSubClass*/
+  0x00,                       /*bDeviceProtocol*/
+#endif
   USB_MAX_EP0_SIZE,           /*bMaxPacketSize*/
   LOBYTE(USBD_VID),           /*idVendor*/
   HIBYTE(USBD_VID),           /*idVendor*/

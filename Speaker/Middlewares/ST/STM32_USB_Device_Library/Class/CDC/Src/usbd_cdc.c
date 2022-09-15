@@ -173,9 +173,9 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   USB_DESC_TYPE_CONFIGURATION,                /* bDescriptorType: Configuration */
   USB_CDC_CONFIG_DESC_SIZ,                    /* wTotalLength */
   0x00,
-#if USE_CDC_IAD && USE_CDC_NUM == 2
+#if USE_CDC_NUM == 2
   0x02 * 2,                                   /* bNumInterfaces: 2 interfaces */
-#elif USE_CDC_IAD && USE_CDC_NUM == 3
+#elif USE_CDC_NUM == 3
   0x02 * 3,                                   /* bNumInterfaces: 2 interfaces */
 #else
   0x02,                                       /* bNumInterfaces: 2 interfaces */
@@ -191,7 +191,7 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   USBD_MAX_POWER,                             /* MaxPower (mA) */
 
   /*---------------------------------------------------------------------------*/
-#if USE_CDC_IAD && USE_CDC_NUM >= 2
+#if USE_CDC_NUM >= 2
 /* Interface Association Descriptor IAD描述符 -- 控制接口 0 */
   0x08,                                 /* bLength IAD描述符大小 */
   0x0B,                                 /* bDescriptorType IAD描述符类型 */
@@ -281,7 +281,7 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
   0x00,                                       /* bInterval */
 
-#if USE_CDC_IAD && USE_CDC_NUM >= 2
+#if USE_CDC_NUM >= 2
 /* Interface Association Descriptor IAD描述符 -- 控制接口 0 */
   0x08,                                 /* bLength IAD描述符大小 */
   0x0B,                                 /* bDescriptorType IAD描述符类型 */
@@ -335,7 +335,7 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   /* Endpoint 2 Descriptor */
   0x07,                                       /* bLength: Endpoint Descriptor size */
   USB_DESC_TYPE_ENDPOINT,                     /* bDescriptorType: Endpoint */
-  CDC_CMD_EP5,                                /* bEndpointAddress */
+  CDC2_CMD_EP,                                /* bEndpointAddress */
   0x03,                                       /* bmAttributes: Interrupt */
   LOBYTE(CDC_CMD_PACKET_SIZE),                /* wMaxPacketSize */
   HIBYTE(CDC_CMD_PACKET_SIZE),
@@ -356,7 +356,7 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   /* Endpoint OUT Descriptor */
   0x07,                                       /* bLength: Endpoint Descriptor size */
   USB_DESC_TYPE_ENDPOINT,                     /* bDescriptorType: Endpoint */
-  CDC_OUT_EP2,                                /* bEndpointAddress */
+  CDC2_OUT_EP,                                /* bEndpointAddress */
   0x02,                                       /* bmAttributes: Bulk */
   LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),        /* wMaxPacketSize */
   HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
@@ -365,14 +365,14 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   /* Endpoint IN Descriptor */
   0x07,                                       /* bLength: Endpoint Descriptor size */
   USB_DESC_TYPE_ENDPOINT,                     /* bDescriptorType: Endpoint */
-  CDC_IN_EP2,                                 /* bEndpointAddress */
+  CDC2_IN_EP,                                 /* bEndpointAddress */
   0x02,                                       /* bmAttributes: Bulk */
   LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),        /* wMaxPacketSize */
   HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
   0x00,                                       /* bInterval */
 #endif
 
-#if USE_CDC_IAD && USE_CDC_NUM >= 3
+#if USE_CDC_NUM >= 3
 /* Interface Association Descriptor IAD描述符 -- 控制接口 0 */
   0x08,                                 /* bLength IAD描述符大小 */
   0x0B,                                 /* bDescriptorType IAD描述符类型 */
@@ -426,7 +426,7 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   /* Endpoint 2 Descriptor */
   0x07,                                       /* bLength: Endpoint Descriptor size */
   USB_DESC_TYPE_ENDPOINT,                     /* bDescriptorType: Endpoint */
-  CDC_CMD_EP6,                                /* bEndpointAddress */
+  CDC3_CMD_EP,                                /* bEndpointAddress */
   0x03,                                       /* bmAttributes: Interrupt */
   LOBYTE(CDC_CMD_PACKET_SIZE),                /* wMaxPacketSize */
   HIBYTE(CDC_CMD_PACKET_SIZE),
@@ -447,7 +447,7 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   /* Endpoint OUT Descriptor */
   0x07,                                       /* bLength: Endpoint Descriptor size */
   USB_DESC_TYPE_ENDPOINT,                     /* bDescriptorType: Endpoint */
-  CDC_OUT_EP3,                                /* bEndpointAddress */
+  CDC3_OUT_EP,                                /* bEndpointAddress */
   0x02,                                       /* bmAttributes: Bulk */
   LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),        /* wMaxPacketSize */
   HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
@@ -456,7 +456,7 @@ __ALIGN_BEGIN static uint8_t USBD_CDC_CfgDesc[USB_CDC_CONFIG_DESC_SIZ] __ALIGN_E
   /* Endpoint IN Descriptor */
   0x07,                                       /* bLength: Endpoint Descriptor size */
   USB_DESC_TYPE_ENDPOINT,                     /* bDescriptorType: Endpoint */
-  CDC_IN_EP3,                                 /* bEndpointAddress */
+  CDC3_IN_EP,                                 /* bEndpointAddress */
   0x02,                                       /* bmAttributes: Bulk */
   LOBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),        /* wMaxPacketSize */
   HIBYTE(CDC_DATA_FS_MAX_PACKET_SIZE),
@@ -526,39 +526,39 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
 
     /* Set bInterval for CDC CMD Endpoint */
     pdev->ep_in[CDCCmdEpAdd & 0xFU].bInterval = CDC_HS_BINTERVAL;
-#if USE_CDC_IAD && USE_CDC_NUM >= 2
+#if USE_CDC_NUM >= 2
     /* CDC2 */
     /* Open EP IN */
-    (void)USBD_LL_OpenEP(pdev, CDC_IN_EP2, USBD_EP_TYPE_BULK,
+    (void)USBD_LL_OpenEP(pdev, CDC2_IN_EP, USBD_EP_TYPE_BULK,
                          CDC_DATA_HS_IN_PACKET_SIZE);
 
-    pdev->ep_in[CDC_IN_EP2 & 0xFU].is_used = 1U;
+    pdev->ep_in[CDC2_IN_EP & 0xFU].is_used = 1U;
 
     /* Open EP OUT */
-    (void)USBD_LL_OpenEP(pdev, CDC_OUT_EP2, USBD_EP_TYPE_BULK,
+    (void)USBD_LL_OpenEP(pdev, CDC2_OUT_EP, USBD_EP_TYPE_BULK,
                          CDC_DATA_HS_OUT_PACKET_SIZE);
 
-    pdev->ep_out[CDC_OUT_EP2 & 0xFU].is_used = 1U;
+    pdev->ep_out[CDC2_OUT_EP & 0xFU].is_used = 1U;
 
     /* Set bInterval for CDC CMD Endpoint */
-    pdev->ep_in[CDC_CMD_EP5 & 0xFU].bInterval = CDC_HS_BINTERVAL;
+    pdev->ep_in[CDC2_CMD_EP & 0xFU].bInterval = CDC_HS_BINTERVAL;
 #endif
-#if USE_CDC_IAD && USE_CDC_NUM >= 3
+#if USE_CDC_NUM >= 3
     /* CDC3 */
     /* Open EP IN */
-    (void)USBD_LL_OpenEP(pdev, CDC_IN_EP3, USBD_EP_TYPE_BULK,
+    (void)USBD_LL_OpenEP(pdev, CDC3_IN_EP, USBD_EP_TYPE_BULK,
                          CDC_DATA_HS_IN_PACKET_SIZE);
 
-    pdev->ep_in[CDC_IN_EP3 & 0xFU].is_used = 1U;
+    pdev->ep_in[CDC3_IN_EP & 0xFU].is_used = 1U;
 
     /* Open EP OUT */
-    (void)USBD_LL_OpenEP(pdev, CDC_OUT_EP3, USBD_EP_TYPE_BULK,
+    (void)USBD_LL_OpenEP(pdev, CDC3_OUT_EP, USBD_EP_TYPE_BULK,
                          CDC_DATA_HS_OUT_PACKET_SIZE);
 
-    pdev->ep_out[CDC_OUT_EP3 & 0xFU].is_used = 1U;
+    pdev->ep_out[CDC3_OUT_EP & 0xFU].is_used = 1U;
 
     /* Set bInterval for CDC CMD Endpoint */
-    pdev->ep_in[CDC_CMD_EP6 & 0xFU].bInterval = CDC_HS_BINTERVAL;
+    pdev->ep_in[CDC3_CMD_EP & 0xFU].bInterval = CDC_HS_BINTERVAL;
 #endif
   }
   else
@@ -578,40 +578,40 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     /* Set bInterval for CMD Endpoint */
     pdev->ep_in[CDCCmdEpAdd & 0xFU].bInterval = CDC_FS_BINTERVAL;
 
-#if USE_CDC_IAD && USE_CDC_NUM >= 2
+#if USE_CDC_NUM >= 2
     /* CDC2 */
     /* Open EP IN */
-    (void)USBD_LL_OpenEP(pdev, CDC_IN_EP2, USBD_EP_TYPE_BULK,
+    (void)USBD_LL_OpenEP(pdev, CDC2_IN_EP, USBD_EP_TYPE_BULK,
                          CDC_DATA_FS_IN_PACKET_SIZE);
 
-    pdev->ep_in[CDC_IN_EP2 & 0xFU].is_used = 1U;
+    pdev->ep_in[CDC2_IN_EP & 0xFU].is_used = 1U;
 
     /* Open EP OUT */
-    (void)USBD_LL_OpenEP(pdev, CDC_OUT_EP2, USBD_EP_TYPE_BULK,
+    (void)USBD_LL_OpenEP(pdev, CDC2_OUT_EP, USBD_EP_TYPE_BULK,
                          CDC_DATA_FS_OUT_PACKET_SIZE);
 
-    pdev->ep_out[CDC_OUT_EP2 & 0xFU].is_used = 1U;
+    pdev->ep_out[CDC2_OUT_EP & 0xFU].is_used = 1U;
 
     /* Set bInterval for CDC CMD Endpoint */
-    pdev->ep_in[CDC_CMD_EP5 & 0xFU].bInterval = CDC_FS_BINTERVAL;
+    pdev->ep_in[CDC2_CMD_EP & 0xFU].bInterval = CDC_FS_BINTERVAL;
 
 #endif
-#if USE_CDC_IAD && USE_CDC_NUM >= 3
+#if USE_CDC_NUM >= 3
     /* CDC3 */
     /* Open EP IN */
-    (void)USBD_LL_OpenEP(pdev, CDC_IN_EP3, USBD_EP_TYPE_BULK,
+    (void)USBD_LL_OpenEP(pdev, CDC3_IN_EP, USBD_EP_TYPE_BULK,
                          CDC_DATA_FS_IN_PACKET_SIZE);
 
-    pdev->ep_in[CDC_IN_EP3 & 0xFU].is_used = 1U;
+    pdev->ep_in[CDC3_IN_EP & 0xFU].is_used = 1U;
 
     /* Open EP OUT */
-    (void)USBD_LL_OpenEP(pdev, CDC_OUT_EP3, USBD_EP_TYPE_BULK,
+    (void)USBD_LL_OpenEP(pdev, CDC3_OUT_EP, USBD_EP_TYPE_BULK,
                          CDC_DATA_FS_OUT_PACKET_SIZE);
 
-    pdev->ep_out[CDC_OUT_EP3 & 0xFU].is_used = 1U;
+    pdev->ep_out[CDC3_OUT_EP & 0xFU].is_used = 1U;
 
     /* Set bInterval for CDC CMD Endpoint */
-    pdev->ep_in[CDC_CMD_EP6 & 0xFU].bInterval = CDC_FS_BINTERVAL;
+    pdev->ep_in[CDC3_CMD_EP & 0xFU].bInterval = CDC_FS_BINTERVAL;
 #endif
   }
 
@@ -619,13 +619,13 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   (void)USBD_LL_OpenEP(pdev, CDCCmdEpAdd, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
   pdev->ep_in[CDCCmdEpAdd & 0xFU].is_used = 1U;
 
-#if USE_CDC_IAD && USE_CDC_NUM >= 2
-  (void)USBD_LL_OpenEP(pdev, CDC_CMD_EP5, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
-  pdev->ep_in[CDC_CMD_EP5 & 0xFU].is_used = 1U;
+#if USE_CDC_NUM >= 2
+  (void)USBD_LL_OpenEP(pdev, CDC2_CMD_EP, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
+  pdev->ep_in[CDC2_CMD_EP & 0xFU].is_used = 1U;
 #endif
-#if USE_CDC_IAD && USE_CDC_NUM >= 3
-  (void)USBD_LL_OpenEP(pdev, CDC_CMD_EP6, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
-  pdev->ep_in[CDC_CMD_EP6 & 0xFU].is_used = 1U;
+#if USE_CDC_NUM >= 3
+  (void)USBD_LL_OpenEP(pdev, CDC3_CMD_EP, USBD_EP_TYPE_INTR, CDC_CMD_PACKET_SIZE);
+  pdev->ep_in[CDC3_CMD_EP & 0xFU].is_used = 1U;
 #endif
 
   hcdc->RxBuffer = NULL;
@@ -647,12 +647,12 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     /* Prepare Out endpoint to receive next packet */
     (void)USBD_LL_PrepareReceive(pdev, CDCOutEpAdd, hcdc->RxBuffer,
                                  CDC_DATA_HS_OUT_PACKET_SIZE);
-#if USE_CDC_IAD && USE_CDC_NUM >= 2
-    (void)USBD_LL_PrepareReceive(pdev, CDC_OUT_EP2, hcdc->RxBuffer,
+#if USE_CDC_NUM >= 2
+    (void)USBD_LL_PrepareReceive(pdev, CDC2_OUT_EP, hcdc->RxBuffer,
                                  CDC_DATA_HS_OUT_PACKET_SIZE);
 #endif
-#if USE_CDC_IAD && USE_CDC_NUM >= 3
-    (void)USBD_LL_PrepareReceive(pdev, CDC_OUT_EP3, hcdc->RxBuffer,
+#if USE_CDC_NUM >= 3
+    (void)USBD_LL_PrepareReceive(pdev, CDC3_OUT_EP, hcdc->RxBuffer,
                                  CDC_DATA_HS_OUT_PACKET_SIZE);
 #endif
   }
@@ -661,12 +661,12 @@ static uint8_t USBD_CDC_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     /* Prepare Out endpoint to receive next packet */
     (void)USBD_LL_PrepareReceive(pdev, CDCOutEpAdd, hcdc->RxBuffer,
                                  CDC_DATA_FS_OUT_PACKET_SIZE);
-#if USE_CDC_IAD && USE_CDC_NUM >= 2
-    (void)USBD_LL_PrepareReceive(pdev, CDC_OUT_EP2, hcdc->RxBuffer,
+#if USE_CDC_NUM >= 2
+    (void)USBD_LL_PrepareReceive(pdev, CDC2_OUT_EP, hcdc->RxBuffer,
                                  CDC_DATA_FS_OUT_PACKET_SIZE);
 #endif
-#if USE_CDC_IAD && USE_CDC_NUM >= 3
-    (void)USBD_LL_PrepareReceive(pdev, CDC_OUT_EP3, hcdc->RxBuffer,
+#if USE_CDC_NUM >= 3
+    (void)USBD_LL_PrepareReceive(pdev, CDC3_OUT_EP, hcdc->RxBuffer,
                                  CDC_DATA_FS_OUT_PACKET_SIZE);
 #endif
   }
@@ -706,34 +706,34 @@ static uint8_t USBD_CDC_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   pdev->ep_in[CDCCmdEpAdd & 0xFU].is_used = 0U;
   pdev->ep_in[CDCCmdEpAdd & 0xFU].bInterval = 0U;
 
-#if USE_CDC_IAD && USE_CDC_NUM >= 2
+#if USE_CDC_NUM >= 2
   /* Close EP2 IN */
-  (void)USBD_LL_CloseEP(pdev, CDC_IN_EP2);
-  pdev->ep_in[CDC_IN_EP2 & 0xFU].is_used = 0U;
+  (void)USBD_LL_CloseEP(pdev, CDC2_IN_EP);
+  pdev->ep_in[CDC2_IN_EP & 0xFU].is_used = 0U;
 
   /* Close EP2 OUT */
-  (void)USBD_LL_CloseEP(pdev, CDC_OUT_EP2);
-  pdev->ep_out[CDC_OUT_EP2 & 0xFU].is_used = 0U;
+  (void)USBD_LL_CloseEP(pdev, CDC2_OUT_EP);
+  pdev->ep_out[CDC2_OUT_EP & 0xFU].is_used = 0U;
 
   /* Close Command IN EP5 */
-  (void)USBD_LL_CloseEP(pdev, CDC_CMD_EP5);
-  pdev->ep_in[CDC_CMD_EP5 & 0xFU].is_used = 0U;
-  pdev->ep_in[CDC_CMD_EP5 & 0xFU].bInterval = 0U;
+  (void)USBD_LL_CloseEP(pdev, CDC2_CMD_EP);
+  pdev->ep_in[CDC2_CMD_EP & 0xFU].is_used = 0U;
+  pdev->ep_in[CDC2_CMD_EP & 0xFU].bInterval = 0U;
 #endif
 
-#if USE_CDC_IAD && USE_CDC_NUM >= 3
+#if USE_CDC_NUM >= 3
   /* Close EP3 IN */
-  (void)USBD_LL_CloseEP(pdev, CDC_IN_EP3);
-  pdev->ep_in[CDC_IN_EP3 & 0xFU].is_used = 0U;
+  (void)USBD_LL_CloseEP(pdev, CDC3_IN_EP);
+  pdev->ep_in[CDC3_IN_EP & 0xFU].is_used = 0U;
 
   /* Close EP3 OUT */
-  (void)USBD_LL_CloseEP(pdev, CDC_OUT_EP3);
-  pdev->ep_out[CDC_OUT_EP3 & 0xFU].is_used = 0U;
+  (void)USBD_LL_CloseEP(pdev, CDC3_OUT_EP);
+  pdev->ep_out[CDC3_OUT_EP & 0xFU].is_used = 0U;
 
   /* Close Command IN EP6 */
-  (void)USBD_LL_CloseEP(pdev, CDC_CMD_EP6);
-  pdev->ep_in[CDC_CMD_EP6 & 0xFU].is_used = 0U;
-  pdev->ep_in[CDC_CMD_EP6 & 0xFU].bInterval = 0U;
+  (void)USBD_LL_CloseEP(pdev, CDC3_CMD_EP);
+  pdev->ep_in[CDC3_CMD_EP & 0xFU].is_used = 0U;
+  pdev->ep_in[CDC3_CMD_EP & 0xFU].bInterval = 0U;
 #endif
 
   /* DeInit  physical Interface components */

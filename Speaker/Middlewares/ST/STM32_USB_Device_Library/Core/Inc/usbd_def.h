@@ -63,11 +63,11 @@ extern "C" {
 #endif /* USE_USBD_COMPOSITE */
 
 #ifndef USBD_MAX_CLASS_ENDPOINTS
-#define USBD_MAX_CLASS_ENDPOINTS                       5U
+#define USBD_MAX_CLASS_ENDPOINTS                       8U /* 每个类最大端点地址编号 + 1：CDC MAX EP 0x87 */
 #endif /* USBD_MAX_CLASS_ENDPOINTS */
 
 #ifndef USBD_MAX_CLASS_INTERFACES
-#define USBD_MAX_CLASS_INTERFACES                      5U
+#define USBD_MAX_CLASS_INTERFACES                      8U /* 每个类的最大接口数：多路CDC MAX 6 */
 #endif /* USBD_MAX_CLASS_INTERFACES */
 
 #ifndef USBD_LPM_ENABLED
@@ -330,6 +330,8 @@ typedef enum
   CLASS_TYPE_PRINTER = 11,
   CLASS_TYPE_CCID    = 12,
   CLASS_TYPE_MICROPHONE = 13,
+  CLASS_TYPE_HEADPHONE  = 14,
+  CLASS_TYPE_MULTI_CDC  = 15,
 } USBD_CompositeClassTypeDef;
 
 

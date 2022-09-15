@@ -376,15 +376,30 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
   /* USER CODE BEGIN TxRx_Configuration */
 #ifdef USE_USBD_COMPOSITE
-  /* EP_OUT: 0x00(64) 0x01(CDC 64) 0x02(Auido 64) 0x03(NULL fill 64) 0x04(NULL fill 64) 最小64Bytes，HAL_PCDEx_SetRxFiFo每个数值代表4Bytes */
-  HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_FS, 16 + 16 * 4);
+  #if USBD_CMPSIT_ACTIVATE_MULTI_CDC
+    /* EP_OUT: 0x00(64) 0x01(CDC 64) 0x02(Speaker 64) 0x03(CDC2 64) 0x04(CDC3 64) 最小64Bytes，HAL_PCDEx_SetRxFiFo每个数值代表4Bytes */
+    HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_FS, 16 + 16 * 4);
 
-  /* EP_IN: 0x80(64) 0x81(CDC 64) 0x82(NULL fill 64) 0x83(NULL fill 64) 0x84(CDC 8) */
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 0, 16);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 1, 16);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 2, 16);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 3, 16);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 4, 16);
+    /* EP_IN: 0x80(64) 0x81(CDC 64) 0x82(Microphone 64) 0x83(CDC2 64) 0x84(CD3 64) 0x85(CDC 8) 0x86(CDC2 8) 0x87(CDC3 8) */
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 0, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 1, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 2, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 3, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 4, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 5, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 6, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 7, 16);
+  #else
+    /* EP_OUT: 0x00(64) 0x01(CDC 64) 0x02(Speaker 64) 0x03(NULL fill 64) 0x04(NULL fill 64) 最小64Bytes，HAL_PCDEx_SetRxFiFo每个数值代表4Bytes */
+    HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_FS, 16 + 16 * 4);
+
+    /* EP_IN: 0x80(64) 0x81(CDC 64) 0x82(Microphone 64) 0x83(NULL fill 64) 0x84(CDC 8) */
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 0, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 1, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 2, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 3, 16);
+    HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_FS, 4, 16);
+  #endif
 #else
   /* EP_OUT: 0x00(64) 0x01(64) 0x02(64) 0x03(64) 0x04(NULL fill 64) 0x05(NULL fill 64) 0x06(NULL fill 64) 最小64Bytes，HAL_PCDEx_SetRxFiFo每个数值代表4Bytes */
   HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_FS, 16 + 16 * 6);

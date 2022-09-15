@@ -27,6 +27,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include  "usbd_ioreq.h"
 #include "usbd_audio.h"
+#include "USB_Audio_Port.h"
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
   */
@@ -38,7 +39,7 @@ extern "C" {
 
 
 #ifndef MICROPHONE_IN_EP
-#define MICROPHONE_IN_EP                              0x83U
+#define MICROPHONE_IN_EP                              0x82U
 #endif /* MICROPHONE_IN_EP */
 
 
