@@ -290,7 +290,9 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len, uint8_t epnum)
  if (hcdc->TxState != 0){
   USBD_LL_FlushEP(&hUsbDeviceFS, epnum);
   hcdc->TxState = 0;
-  return USBD_BUSY;
+  USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
+  result = USBD_CDC_TransmitPacket(&hUsbDeviceFS, epnum);   
+  return result;
  }
 
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, Buf, Len);
